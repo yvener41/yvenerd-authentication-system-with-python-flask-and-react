@@ -102,8 +102,6 @@ def get_invoices():
     user = User.query.filter_by(id = user_id).first()
     #query and retrieve any invoices that are in the DB
     user_invoices = Invoice.query.filter_by(user_id=user_id).all()
-
-    print("user_invoices: ", user_invoices)
     
     #use a list comprehension (for loop) that will:
     # 1. Get each object Invoice object and serialize() it
@@ -116,3 +114,12 @@ def get_invoices():
     }
 
     return jsonify(response), 200
+
+#work on the front end
+#1. create 3 new pages: /Signup, /Login, /Private
+     #uodate layout.js as well
+#2. create the necessary inputs needed for signup and login.js
+#3. make sure that they are controlled inputs (useState)
+#4. include useContext and Context for flux applications
+#5. update flux.js to have token, message, invoices in the store\
+#6. update and test actions to be able to retrieve a token and save it in localstorage
