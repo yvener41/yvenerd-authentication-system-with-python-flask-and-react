@@ -43,7 +43,7 @@ def generate_token():
     response ={
         "access_token": access_token,
         "user_id": user.id,
-        "msg": f'Welcome {user.email}! This worked!'
+        "msg": f'Welcome {user.email}!'
     }
     return jsonify(response), 200
 
