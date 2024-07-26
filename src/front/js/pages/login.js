@@ -13,6 +13,8 @@ import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Context } from '../store/appContext';
 
+import "../../styles/sign-in.css";
+
 export const Login = () =>{
     const [email, setEmail] = useState("");
     const [password, setPassword] =useState("");
@@ -31,7 +33,7 @@ export const Login = () =>{
 
     return(
         <>
-               <div className='login-page'>
+               <main className="form-signin w-100 m-auto">
                 {(store.token && store.token !== "" && store.token != undefined) ? (
 
                     <>
@@ -43,31 +45,45 @@ export const Login = () =>{
                 ) : (
 
                     <>
+                    
+                        <div className='setPosition'>
                          <div>
-                              <h1>Log In</h1>
+                         <h1 className="h1 mb-3 fw-normal text1">Sign In</h1>
                          </div>
-                       <div>
+                       <div className='storeMessage'>
                         {store.loginMessage || ""}
                        </div>
                        <div>
-                      <input type='email'
-                             placeholder='Enter email'
-                             value={email}
-                             onChange={e => setEmail(e.target.value)}
-                             required />
+
+                <div className="form-floating">
+                   <input type="email" 
+                   className="form-control" 
+                   id="floatingInput" 
+                   placeholder="Enter Email"
+                   value={email}
+                   onChange={e => setEmail(e.target.value)}
+                   required />
+                  <label htmlFor="floatingInput">Email address</label>
+                </div>
                              
-                      <input type='password'
-                            placeholder='Enter password'
-                            value={password}
-                            onChange={e => setPassword(e.target.value)}
-                            required />
+                <div className="form-floating">
+                  <input type="password" 
+                  className="form-control" 
+                  id="floatingPassword" 
+                  placeholder="Enter Password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  required />
+                  <label htmlFor="floatingPassword">Password</label>
+                 </div>
                    </div>
-                   <div>
-                       <button
-                           onClick={handleClick}
-                       >Login</button>
-                   </div>
-                    
+                   
+                   <button 
+                   onClick={handleClick}
+                   className="btn w-100 py-2" type="submit">Sign in</button>
+                                      
+                    </div>
+                  
                     </>
                 )
 
@@ -75,7 +91,9 @@ export const Login = () =>{
                 }
 
             
-               </div>
+           </main>
+               
         </>
+    
     );
 }
