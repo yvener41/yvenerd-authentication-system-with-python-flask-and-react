@@ -36,7 +36,7 @@ class Invoice(db.Model):
     def serialize(self):
         return {
             "invoice_date": self.invoice_date,
-            "invoice_number": self.invoice_date,
+            "invoice_number": self.invoice_number,
             "invoice_amount": self.invoice_amount,
             # do not serialize the password, its a security breach
         }

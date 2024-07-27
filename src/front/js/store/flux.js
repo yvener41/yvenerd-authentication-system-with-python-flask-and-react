@@ -119,37 +119,77 @@ const getState = ({ getStore, getActions, setStore }) => {
 				})
 			},
 
-			getInvoices: async() => {
-				const store = getStore()
-				console.log(store)
-					const options = {
-						method: 'GET',
-						mode: 'cors',
-						headers: {
-							'Content-Type': 'application/json',
-							'Authorization': `Bearer ${store.token}`
-						},
-					}
+			// getInvoices: async() => {
+			// 	const store = getStore()
+			// 	console.log(store)
+			// 		const options = {
+			// 			method: 'GET',
+			// 			mode: 'cors',
+			// 			headers: {
+			// 				'Content-Type': 'application/json',
+			// 				'Authorization': `Bearer ${store.token}`
+			// 			},
+			// 		}
 	
-					const response = await fetch(`${process.env.BACKEND_URL}api/invoices`, options)
+			// 		const response = await fetch(`${process.env.BACKEND_URL}api/invoices`, options)
 	
-					if(!response.ok){
-						return{
-							error: {
-								status: response.status,
-								statusText: response.statusText
-							}
-						}
-					}
+			// 		if(!response.ok){
+			// 			return{
+			// 				error: {
+			// 					status: response.status,
+			// 					statusText: response.statusText
+			// 				}
+			// 			}
+			// 		}
 	
-					const data = await response.json()
-					setStore({
-						invoices: data.invoices,
-						invoiceMessage: data.msg
-					})
-					console.log(data.msg, data.invoices)
-					return data;
-			}
+			// 		const data = await response.json()
+			// 		setStore({
+			// 			invoices: data.invoices,
+			// 			invoiceMessage: data.msg
+			// 		})
+			// 		console.log(data.msg, data.invoices)
+			// 		return data;
+			// }
+			getInvoices: async () => {
+                const store = getStore();
+                if (!store.token) {
+                    console.log("Token is not available");
+                    return;
+                }
+
+                const options = {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${store.token}`
+                    }
+                };
+
+                try {
+                    const response = await fetch(`${process.env.BACKEND_URL}api/invoices`, options);
+                    if (!response.ok) {
+                        console.error("Failed to fetch invoices:", response.status, response.statusText);
+                        return {
+                            error: {
+                                status: response.status,
+                                statusText: response.statusText
+                            }
+                        };
+                    }
+
+                    const data = await response.json();
+                    console.log("Fetched invoices:", data);
+                    setStore({
+                        invoices: data.invoices,
+                        invoiceMessage: data.msg
+                    });
+                    console.log("Store after fetching invoices:", getStore());
+                    return data;
+                } catch (error) {
+                    console.error("Error fetching invoices:", error);
+                }
+            }
 	
 		}
 	};
