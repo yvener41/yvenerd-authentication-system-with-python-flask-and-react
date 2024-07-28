@@ -1,198 +1,91 @@
 const getState = ({ getStore, getActions, setStore }) => {
-	return {
-		store: {
-			token: null,
-			signupMessage: null,
-			isSignUpSuccessful: false,
-			loginMessage: null,
-			isLoginSuccessful: false,
-			invoiceMessage: null,
-			invoices: []
-			
-			
-		},
-		actions: {
-			// Use getActions to call a function within a fuction
-			// exampleFunction: () => {
-			// 	getActions().changeColor(0, "green");
-			// },
-
-			// getMessage: async () => {
-			// 	try{
-			// 		// fetching data from the backend
-			// 		const resp = await fetch(process.env.BACKEND_URL + "/api/hello")
-			// 		const data = await resp.json()
-			// 		setStore({ message: data.message })
-			// 		// don't forget to return something, that is how the async resolves
-			// 		return data;
-			// 	}catch(error){
-			// 		console.log("Error loading message from backend", error)
-			// 	}
-			// },
-			SignUp: async(userEmail, userPassword) =>{
-                const options = {
-					method: 'POST',
-					mode: 'cors',
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify({
-						email: userEmail,
-						password: userPassword
-					})
-				}
-
-				const response = await fetch(`${process.env.BACKEND_URL}api/signup`, options)
-
-				if(!response.ok){
-					const data = await response.json()
-					setStore({signupMessage: data.msg})
-					return{
-						error: {
-							status: response.status,
-							statusText: response.statusText
-						}
-					}
-				}
-
-				const data = await response.json()
-				setStore({
-					signupMessage: data.msg,
-                    isSignUpSuccessful: response.ok
-			    })
-				return data;
-			},
-
-			login: async(userEmail, userPassword) =>{
-                const options = {
-					method: 'POST',
-					mode: 'cors',
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify({
-						email: userEmail,
-						password: userPassword
-					})
-				}
-
-				const response = await fetch(`${process.env.BACKEND_URL}api/token`, options)
-
-				if(!response.ok){
-					const data = await response.json()
-					setStore({loginMessage: data.msg})
-					return{
-						error: {
-							status: response.status,
-							statusText: response.statusText
-						}
-					}
-				}
-
-				const data = await response.json()
-				sessionStorage.setItem("token", data.access_token)
-				setStore({
-					loginMessage: data.msg,
-					token: data.access_token,
-					isLoginSuccessful: true
-			    })
-				return data;
-			},
-
-			syncSessionTokenFromStore: () => {
-                 const sessionToken = sessionStorage.getItem('token');
-				 if(sessionToken && sessionToken !== "" && sessionToken !== undefined){
-					setStore({token: sessionToken})
-				 }
-			},
-
-			logout: () =>{
-				sessionStorage.removeItem('token');
-				setStore({
-					token: null,
-			        signupMessage: null,
-			        isSignUpSuccessful: false,
-			        loginMessage: null,
-			        isLoginSuccessful: false,
-	            	invoiceMessage: null,
-			        invoices: []
-				})
-			},
-
-			// getInvoices: async() => {
-			// 	const store = getStore()
-			// 	console.log(store)
-			// 		const options = {
-			// 			method: 'GET',
-			// 			mode: 'cors',
-			// 			headers: {
-			// 				'Content-Type': 'application/json',
-			// 				'Authorization': `Bearer ${store.token}`
-			// 			},
-			// 		}
-	
-			// 		const response = await fetch(`${process.env.BACKEND_URL}api/invoices`, options)
-	
-			// 		if(!response.ok){
-			// 			return{
-			// 				error: {
-			// 					status: response.status,
-			// 					statusText: response.statusText
-			// 				}
-			// 			}
-			// 		}
-	
-			// 		const data = await response.json()
-			// 		setStore({
-			// 			invoices: data.invoices,
-			// 			invoiceMessage: data.msg
-			// 		})
-			// 		console.log(data.msg, data.invoices)
-			// 		return data;
-			// }
-			getInvoices: async () => {
-                const store = getStore();
-                if (!store.token) {
-                    console.log("Token is not available");
-                    return;
+    return {
+        store: {
+            token: localStorage.getItem('token') || null,
+            invoices: [],
+        },
+        actions: {
+            syncSessionTokenFromStore: () => {
+                const token = localStorage.getItem('token');
+                if (token) {
+                    setStore({ token });
+                    getActions().getInvoices();
                 }
+            },
 
-                const options = {
-                    method: 'GET',
-                    mode: 'cors',
+            getInvoices: async () => {
+                const store = getStore();
+                const token = store.token;
+
+                if (!token) return;
+
+                const response = await fetch(`${process.env.BACKEND_URL}/api/invoices`, {
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${store.token}`
+                        Authorization: `Bearer ${token}`
                     }
-                };
+                });
 
-                try {
-                    const response = await fetch(`${process.env.BACKEND_URL}api/invoices`, options);
-                    if (!response.ok) {
-                        console.error("Failed to fetch invoices:", response.status, response.statusText);
-                        return {
-                            error: {
-                                status: response.status,
-                                statusText: response.statusText
-                            }
-                        };
-                    }
-
+                if (response.ok) {
                     const data = await response.json();
-                    console.log("Fetched invoices:", data);
-                    setStore({
-                        invoices: data.invoices,
-                        invoiceMessage: data.msg
-                    });
-                    console.log("Store after fetching invoices:", getStore());
-                    return data;
-                } catch (error) {
-                    console.error("Error fetching invoices:", error);
+                    setStore({ invoices: data.invoices });
+                } else {
+                    console.error('Failed to fetch invoices');
                 }
+            },
+
+            addInvoice: async (invoiceData) => {
+                const store = getStore();
+                const token = store.token;
+
+                const response = await fetch(`${process.env.BACKEND_URL}/api/invoices`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify(invoiceData)
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setStore({ invoices: [...store.invoices, data.invoice] });
+                    return data.invoice;
+                } else {
+                    const error = await response.json();
+                    console.error('Error adding invoice:', error);
+                    return null;
+                }
+            },
+
+            login: async (email, password) => {
+                const response = await fetch(`${process.env.BACKEND_URL}/api/token`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('token', data.access_token);
+                    setStore({ token: data.access_token });
+                    getActions().getInvoices(); // Fetch invoices after login
+                    return data;
+                } else {
+                    const error = await response.json();
+                    console.error('Login failed:', error);
+                    return null;
+                }
+            },
+
+            logout: () => {
+                localStorage.removeItem('token');
+                setStore({ token: null, invoices: [] });
             }
-	
-		}
-	};
+        }
+    };
 };
 
 export default getState;

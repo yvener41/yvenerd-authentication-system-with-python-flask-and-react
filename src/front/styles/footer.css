@@ -1,0 +1,12 @@
+.footer-style {
+    color: #173B45;
+}
+
+.footer-style a{
+    color: #B43F3F;
+}
+
+.moveFooter{
+    margin-bottom: 51%;
+    z-index: 1;
+}

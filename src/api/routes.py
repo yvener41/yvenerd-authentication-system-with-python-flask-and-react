@@ -1,25 +1,28 @@
 """
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
-from flask import Flask, request, jsonify, url_for, Blueprint
+from flask import Flask, request, jsonify, Blueprint
 from api.models import db, User, Invoice
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
+import random
 
 #JWT Imported
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended import jwt_required
 
+# Create the Flask app
+app = Flask(__name__)
+
+# Apply CORS to the entire app
+CORS(app)
+
+# Initialize the Blueprint
 api = Blueprint('api', __name__)
 
 # Allow CORS requests to this API
 CORS(api)
-
-# Token Post
-# this route is for when the user already exist and need an access token
-# create a user query with a conditional to see if the user exists, or return None
-#test on postman
 
 @api.route('/token', methods=['POST'])
 def generate_token():
@@ -115,11 +118,71 @@ def get_invoices():
 
     return jsonify(response), 200
 
-#work on the front end
-#1. create 3 new pages: /Signup, /Login, /Private
-     #uodate layout.js as well
-#2. create the necessary inputs needed for signup and login.js
-#3. make sure that they are controlled inputs (useState)
-#4. include useContext and Context for flux applications
-#5. update flux.js to have token, message, invoices in the store\
-#6. update and test actions to be able to retrieve a token and save it in localstorage
+@api.route('/invoices', methods=['POST'])
+@jwt_required()
+def add_invoice():
+    try:
+        user_id = get_jwt_identity()
+        invoice_amount = request.json.get('invoice_amount')
+        invoice_number = request.json.get('invoice_number')
+        invoice_date = request.json.get('invoice_date')
+
+        if not invoice_amount or not invoice_number or not invoice_date:
+            return jsonify({"msg": "All invoice fields are required"}), 400
+
+        new_invoice = Invoice(
+            invoice_amount=invoice_amount,
+            invoice_number=invoice_number,
+            invoice_date=invoice_date,
+            user_id=user_id
+        )
+
+        db.session.add(new_invoice)
+        db.session.commit()
+
+        return jsonify({"msg": "Invoice added successfully", "invoice": new_invoice.serialize()}), 201
+
+    except Exception as e:
+        return jsonify({"msg": str(e)}), 500
+    
+
+quotes = {
+    'fantastic': [
+        "Keep your face always toward the sunshine—and shadows will fall behind you. —Walt Whitman",
+        "The best way to predict your future is to create it. —Abraham Lincoln",
+        "Be the best of whatever you are. — Martin Luther King, Jr.",
+        "Promise me you’ll always remember: You’re braver than you believe, and stronger than you seem, and smarter than you think. — A. A. Milne",
+        "I don’t like to gamble, but if there’s one thing I’m willing to bet on, it’s myself. — Beyoncé",
+        "All our dreams can come true, if we have the courage to pursue them.— Walt Disney",
+        "Do anything, but let it produce joy. — Henry Miller",
+        "A woman is like a tea bag; you never know how strong it is until it’s in hot water. ― Eleanor Roosevelt",
+        "We need to take risks. We need to go broke. We need to prove them wrong, simply by not giving up. — Awkwafina"
+        
+    ],
+    'sad': [
+        "The way I see it, if you want the rainbow, you gotta put up with the rain. —Dolly Parton",
+        "Tough times never last, but tough people do. —Robert H. Schuller",
+        "There are wounds that never show on the body that are deeper and more hurtful than anything that bleeds. ― Laurell K. Hamilton",
+        "So, this is my life. And I want you to know that I am both happy and sad and I'm still trying to figure out how that could be. — Stephen Chbosky",
+        "The only way out of the labyrinth of suffering is to forgive. John Green",
+        "If you're my friend I should be able to talk to you but I can't, and if I can't talk to you, well, what is the point of you? Of us ?” David Nicholls"
+    ],
+    'unknown': [
+        "Life is what happens when you're busy making other plans. —John Lennon",
+        "Keep calm and carry on. —Winston Churchill"
+    ]
+}
+
+@api.route('/quotes', methods=['GET'])
+def get_quote():
+    mood = request.args.get('mood')
+    if mood in quotes:
+        return jsonify(quote=random.choice(quotes[mood]))
+    return jsonify(quote="Stay positive, work hard, make it happen.")
+
+# Register the Blueprint
+app.register_blueprint(api, url_prefix='/api')
+
+# Main entry point for the app
+if __name__ == '__main__':
+    app.run(debug=True, port=3001)

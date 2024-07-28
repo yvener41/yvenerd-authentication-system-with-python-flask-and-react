@@ -1,0 +1,39 @@
+nav{
+    background-color: #FF8225;
+    color: #173B45;
+}
+
+.text-color{
+    color: #173B45;
+    font-size: 20px;
+    text-decoration: none;
+}
+
+.text-color a{
+    color: #173B45;
+}
+
+.text-color a:hover{
+    color: #B43F3F;
+}
+
+.text-color:hover{
+    color: #B43F3F;
+}
+
+.btn{
+    background-color: #173B45;
+    outline: none;
+}
+
+.btn:hover{
+    background-color: #B43F3F;
+}
+
+.text-2{
+    color: #173B45;
+}
+
+.desc{
+    color: #B43F3F;
+}

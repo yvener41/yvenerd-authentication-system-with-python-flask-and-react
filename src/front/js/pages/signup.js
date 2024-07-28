@@ -1,14 +1,3 @@
-// This page will accept a user's email and password
-// Create a function in flux which will make a POST request with users info in body
-// SUCCESS means:
-// 1. Info will be saved into database
-// 2. Response will include a msg stored in flux store from backend
-// 3. Redirect user to login page and display msg from store letting them know to log in
-
-//FAILURE means:
-// 1. Response will return a msg stored in flux store
-// 2. msg will be displayed on signup page telling the user that the email already exists
-
 import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Context } from '../store/appContext';

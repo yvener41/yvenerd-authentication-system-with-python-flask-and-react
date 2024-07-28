@@ -20,3 +20,12 @@
     background-color: #04AA6D;
     color: white;
   }
+
+  .text-h1{
+     color: #B43F3F;
+     text-decoration: underline;
+  }
+
+  .moveFooter{
+    margin-bottom: 55%;
+}
