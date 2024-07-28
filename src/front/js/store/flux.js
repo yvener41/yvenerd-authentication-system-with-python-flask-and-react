@@ -3,6 +3,10 @@ const getState = ({ getStore, getActions, setStore }) => {
         store: {
             token: localStorage.getItem('token') || null,
             invoices: [],
+            isSignUpSuccessful: false,
+            signupMessage: "",
+            isLoginSuccessful: false,
+            loginMessage: "",
         },
         actions: {
             syncSessionTokenFromStore: () => {
@@ -59,31 +63,66 @@ const getState = ({ getStore, getActions, setStore }) => {
             },
 
             login: async (email, password) => {
-                const response = await fetch(`${process.env.BACKEND_URL}/api/token`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ email, password })
-                });
+                try {
+                    const response = await fetch(`${process.env.BACKEND_URL}/api/token`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ email, password })
+                    });
 
-                if (response.ok) {
-                    const data = await response.json();
-                    localStorage.setItem('token', data.access_token);
-                    setStore({ token: data.access_token });
-                    getActions().getInvoices(); // Fetch invoices after login
-                    return data;
-                } else {
-                    const error = await response.json();
-                    console.error('Login failed:', error);
-                    return null;
+                    if (response.ok) {
+                        const data = await response.json();
+                        localStorage.setItem('token', data.access_token);
+                        setStore({ token: data.access_token, isLoginSuccessful: true, loginMessage: "Your Recent Login Were Successful!" });
+                        getActions().getInvoices(); // Fetch invoices after login
+                    } else {
+                        setStore({ loginMessage: "Your Recent Login Was failed. Please try again.", isLoginSuccessful: false });
+                    }
+                } catch (error) {
+                    setStore({ loginMessage: "An error occurred. Please try again.", isLoginSuccessful: false });
                 }
             },
 
             logout: () => {
                 localStorage.removeItem('token');
-                setStore({ token: null, invoices: [] });
-            }
+                setStore({ token: null, invoices: [], isLoginSuccessful: false });
+            },
+
+            SignUp: async(userEmail, userPassword) =>{
+                const options = {
+					method: 'POST',
+					mode: 'cors',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						email: userEmail,
+						password: userPassword
+					})
+				}
+
+				const response = await fetch(`${process.env.BACKEND_URL}/api/signup`, options)
+
+				if(!response.ok){
+					const data = await response.json()
+					setStore({signupMessage: data.msg})
+					return{
+						error: {
+							status: response.status,
+							statusText: response.statusText
+						}
+					}
+				}
+
+				const data = await response.json()
+				setStore({
+					signupMessage: data.msg,
+                    isSignUpSuccessful: response.ok
+			    })
+				return data;
+			},
         }
     };
 };

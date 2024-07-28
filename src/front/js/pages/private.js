@@ -13,9 +13,9 @@ export const Private = () => {
         actions.getInvoices();
     }, []);
 
-    useEffect(() => {
-        console.log("Store in Private component:", store);
-    }, [store]);
+    // useEffect(() => {
+    //     // console.log("Store in Private component:", store);
+    // }, [store]);
 
     const handleAddInvoice = async () => {
         const invoiceData = {

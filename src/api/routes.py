@@ -16,7 +16,7 @@ from flask_jwt_extended import jwt_required
 app = Flask(__name__)
 
 # Apply CORS to the entire app
-CORS(app)
+CORS(app, origins=['https://glorious-space-barnacle-rwqjwpprjvg3pv96-3000.app.github.dev'])
 
 # Initialize the Blueprint
 api = Blueprint('api', __name__)
